@@ -183,8 +183,6 @@ exports.calculateMonthlySalaryOfAnEmployee = async (req, res) => {
 
 
 
-
-
 exports.calculateSalariesForAllEmployees = async (req, res) => {
     try {
         const { startDate, endDate } = req.body;
@@ -197,14 +195,23 @@ exports.calculateSalariesForAllEmployees = async (req, res) => {
         const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
 
-
-
-        const totalDays = Math.ceil((end - start + 1) / (1000 * 60 * 60 * 24));
         const employees = await Employee.find({ role: 'employee' });
-
-        const results = [];
+        const workbook = new ExcelJS.Workbook();
 
         for (const employee of employees) {
+            const worksheet = workbook.addWorksheet(employee.name);
+
+            worksheet.columns = [
+                { header: 'Employee Name', key: 'EmployeeName', width: 20 },
+                { header: 'Date', key: 'Date', width: 15 },
+                { header: 'Status', key: 'Status', width: 15 },
+                { header: 'Salary', key: 'Salary', width: 10 },
+                { header: 'Login Time', key: 'LoginTime', width: 20 },
+                { header: 'Logout Time', key: 'LogoutTime', width: 20 },
+                { header: 'Late Arrivals', key: 'LateArrivals', width: 15 },
+                { header: 'Early Exit', key: 'EarlyExit', width: 15 }
+            ];
+
             const attendanceRecords = await Attendance.find({
                 employeeId: employee._id,
                 date: { $gte: start, $lt: new Date(end.getTime() + 1) }
@@ -217,82 +224,122 @@ exports.calculateSalariesForAllEmployees = async (req, res) => {
                 status: 'approved'
             });
 
-            // Total approved leaves calculation
-            const totalApprovedLeaves = leaveRecords.reduce((acc, leave) => {
-                const leaveStart = new Date(Math.max(start.getTime(), leave.startDate.getTime()));
-                const leaveEnd = new Date(Math.min(end.getTime(), leave.endDate.getTime()));
-                const leaveDays = Math.ceil((leaveEnd - leaveStart + 1) / (1000 * 60 * 60 * 24));
-                return acc + leaveDays;
-            }, 0);
-
-            // Count working days and half days
-            const workingDays = attendanceRecords.filter(record => record.status === 'fullDay').length;
-            const halfDays = attendanceRecords.filter(record => record.status === 'halfDay').length;
-            const absentDays = totalDays - workingDays - halfDays;
-
-            // Calculate excess and paid leaves/half days
-            const excessLeaves = Math.max(totalApprovedLeaves - employee.allowedLeaves, 0);
-            const paidLeaves = Math.min(totalApprovedLeaves, employee.allowedLeaves);
-            const excessHalfDays = Math.max(halfDays - employee.allowedHalfDays, 0);
-            const paidHalfDays = Math.min(halfDays, employee.allowedHalfDays);
-
-            const perDaySalary = employee.salary / 30;  //30 is average day in a month
+            let totalApprovedLeaves = 0;
+            let lateArrivals = 0;
+            let earlyExits = 0;
+            let halfDays = 0;
+            let excessHalfDays = 0;
+            const perDaySalary = employee.salary / 30;
             const perHalfDaySalary = perDaySalary / 2;
+            let totalSalary = 0; // Initialize total salary
+            const excelData = [];
 
-            // Calculate salary components
-            const allowedLeaveSalary = paidLeaves * perDaySalary;
-            const allowedHalfDaySalary = paidHalfDays * perDaySalary;
-            const excessHalfDaySalary = excessHalfDays * perHalfDaySalary;
+            // Process attendance records
+            attendanceRecords.forEach(record => {
+                let daySalary = perDaySalary;
+                let lateArrival = '';
+                let earlyExit = '';
 
-            // Calculate total salary
-            const totalSalary = (workingDays * perDaySalary) + allowedLeaveSalary + allowedHalfDaySalary + excessHalfDaySalary;
+                if (record.status === 'halfDay') {
+                    halfDays++;
+                    if (halfDays > employee.allowedHalfDays) {
+                        excessHalfDays++;
+                        daySalary /= 2;
+                    }
+                }
 
-            let salary = await Salary.findOne({ employeeId: employee._id, startDate, endDate });
-            if (!salary) {
-                salary = new Salary({
-                    employeeId: employee._id,
-                    startDate,
-                    endDate,
-                    totalDays,
-                    workingDays,
-                    absentDays,
-                    halfDays,
-                    deductions: 0, // No deductions for absent days or excess leaves
-                    totalSalary,
-                    basicSalary: employee.salary
+                const loginTime = new Date(record.loginTime);
+                const isLate = loginTime.getUTCHours() > 10 || (loginTime.getUTCHours() === 10 && loginTime.getUTCMinutes() > 15);
+                if (isLate) {
+                    lateArrivals++;
+                    if (lateArrivals > 3) {
+                        halfDays++;
+                        daySalary /= 2;
+                    }
+                    lateArrival = 'Yes';
+                }
+
+                if (record.logoutTime) {
+                    const logoutTime = new Date(record.logoutTime);
+                    if (logoutTime.getHours() < 18) {
+                        earlyExits++;
+                        if (earlyExits > 1) {
+                            halfDays++;
+                            daySalary /= 2;
+                        }
+                        earlyExit = 'Early Exit';
+                    }
+                }
+
+                totalSalary += daySalary;
+
+                excelData.push({
+                    EmployeeName: employee.name,
+                    Date: record.date.toLocaleDateString(),
+                    Status: record.status,
+                    Salary: daySalary,
+                    LoginTime: record.loginTime ? new Date(record.loginTime).toISOString() : 'N/A',
+                    LogoutTime: record.logoutTime ? new Date(record.logoutTime).toISOString() : 'N/A',
+                    LateArrivals: lateArrival,
+                    EarlyExit: earlyExit
                 });
-            } else {
-                salary.totalDays = totalDays;
-                salary.workingDays = workingDays;
-                salary.absentDays = absentDays;
-                salary.halfDays = halfDays;
-                salary.deductions = 0; // No deductions for absent days or excess leaves
-                salary.totalSalary = totalSalary;
-            }
+            });
 
-            await salary.save();
+            // Process leave records
+            leaveRecords.forEach(leave => {
+                const leaveDays = Math.ceil((leave.endDate - leave.startDate + 1) / (1000 * 60 * 60 * 24));
+                for (let i = 0; i < leaveDays; i++) {
+                    const leaveDate = new Date(leave.startDate);
+                    leaveDate.setDate(leaveDate.getDate() + i);
+                    let leaveDaySalary = perDaySalary;
+                    if (totalApprovedLeaves >= employee.allowedLeaves) {
+                        leaveDaySalary = 0; // Unpaid leave
+                    } else {
+                        totalApprovedLeaves++;
+                    }
+                    excelData.push({
+                        EmployeeName: employee.name,
+                        Date: leaveDate.toLocaleDateString(),
+                        Status: 'Leave',
+                        Salary: leaveDaySalary,
+                        LoginTime: 'N/A',
+                        LogoutTime: 'N/A',
+                        LateArrivals: '',
+                        EarlyExit: ''
+                    });
+                    totalSalary += leaveDaySalary;
+                }
+            });
 
-            results.push({
-                employeeId: employee._id,
-                name: employee.name,
-                totalSalary,
-                allowedLeaves: employee.allowedLeaves,
-                excessLeaves,
-                allowedHalfDays: employee.allowedHalfDays,
-                excessHalfDays,
-                absentDays,
-                leaveSalary: allowedLeaveSalary,
-                halfDaySalary: allowedHalfDaySalary,
-                excessHalfDaySalary
+            // Add summary row with total salary
+            excelData.push({
+                EmployeeName: 'Summary',
+                Date: '',
+                Status: '',
+                Salary: totalSalary, // Show total salary in summary row
+                LoginTime: '',
+                LogoutTime: '',
+                LateArrivals: lateArrivals,
+                EarlyExit: `Half Days: ${halfDays}, Excess Half Days: ${excessHalfDays}`
+            });
+
+            // Add rows to worksheet
+            excelData.forEach(row => {
+                worksheet.addRow(row);
             });
         }
 
-        res.status(200).json({ message: 'Salaries calculated successfully.', salaries: results });
+        // Write the Excel file
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename=SalariesReport.xlsx'
+        );
+        await workbook.xlsx.write(res);
+        res.end();
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Error calculating salaries: ' + error.message });
     }
 };
-
-
 

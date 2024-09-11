@@ -10,6 +10,7 @@ const connectCloudinary = require('./config/cloudinary');
 const helmet = require("helmet");
 const errorMiddleware = require('./middlewares/error');
 const { resetEarlyExits } = require('./cronjobs/resetEarlyExits');
+const path = require("path");
 
 
 // Configuration
@@ -62,6 +63,26 @@ app.use("/api/v1" , employee);
 app.use("/api/v1" , admin);
 
 
+const NODE_ENV = "production";
+// Serve frontend
+if (NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "./dist")));
+  
+    app.get("*", (req, res) =>
+        res.sendFile(
+            path.resolve(__dirname, "./", "dist", "index.html")
+        )
+    );
+} else {
+    app.get("/", (req, res) => res.send("Please set to production"));
+}
+
+app.use("*", (req, res, next) => {
+    app.use("*", (req, res, next) => {
+    throw new Error("Not found");
+});
+    
+});
 
 
 
