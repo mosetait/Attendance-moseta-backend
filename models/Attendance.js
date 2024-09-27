@@ -24,16 +24,26 @@ const attendanceSchema = new mongoose.Schema({
     type: String 
   },
 
-  picture:{
+  loginImage:{
 
     publicId: {
       type: String,
-      required: true
     },
 
     secureUrl: {
       type: String,
-      required: true
+    }
+    
+  },
+
+  logoutImage:{
+
+    publicId: {
+      type: String,
+    },
+
+    secureUrl: {
+      type: String,
     }
     
   },
