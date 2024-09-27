@@ -23,23 +23,39 @@ const attendanceSchema = new mongoose.Schema({
   logoutLocation: { 
     type: String 
   },
-  lateReason:{
-    type: String
+
+  picture:{
+
+    publicId: {
+      type: String,
+      required: true
+    },
+
+    secureUrl: {
+      type: String,
+      required: true
+    }
+    
   },
+
   status: { 
     type: String, 
     enum: ['fullDay', 'halfDay', 'absent'], 
     required: true 
   },
+
   workingHours: { 
     type: Number, // Total working hours
   },
+
   workingMinutes: { 
     type: Number, // Total working minutes
   },
+
   workingSeconds: { 
     type: Number, // Total working seconds
   }
+
 }, {timestamps: true});
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

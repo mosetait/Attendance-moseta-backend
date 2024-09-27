@@ -1,5 +1,6 @@
 const Attendance = require('../models/Attendance');
 const Employee = require('../models/Employee'); // Assuming Employee model is using the same schema as User
+const { uploadImageToCloudinary } = require('../utils/imageUploader'); // Import the Cloudinary upload function
 
 
 
@@ -12,9 +13,9 @@ const EARLY_EXIT_ALLOWED_MINUTES = 120; // 2 hours
 
 
 
+
 // Mark login time
 exports.markLogin = async (req, res) => {
-
   try {
     const { employeeId, loginTime, loginLocation, lateReason } = req.body;
     const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
@@ -42,7 +43,7 @@ exports.markLogin = async (req, res) => {
 
       // If late arrivals exceed the limit (3), mark the day as halfDay
       if (lateCount >= 3) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
           message: 'You have exceeded the maximum allowed late arrivals for this month. Today will be marked as half day.'
         });
@@ -53,42 +54,57 @@ exports.markLogin = async (req, res) => {
       await employee.save();
     }
 
-    if (attendance) {
-      // If loginTime already exists, respond with an error
-      if (attendance.loginTime) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'Login time already marked for today.' 
+    // Upload the image to Cloudinary
+    if (req.file) { // Assuming image is uploaded as `file` field
+      const uploadedImage = await uploadImageToCloudinary(req.file, 'employee_logins');
+      
+      const imageDetails = {
+        publicId: uploadedImage.public_id,
+        secureUrl: uploadedImage.secure_url
+      };
+
+      // If attendance exists, update it
+      if (attendance) {
+        if (attendance.loginTime) {
+          return res.status(400).json({
+            success: false,
+            message: 'Login time already marked for today.'
+          });
+        }
+        // Update existing attendance record
+        attendance.loginTime = loginTime || new Date().toISOString();
+        attendance.loginLocation = loginLocation;
+        attendance.picture = imageDetails;
+        if (isLate) {
+          attendance.lateReason = lateReason;
+        }
+      } else {
+        // Create a new attendance record with image details
+        attendance = new Attendance({
+          employeeId,
+          date: today,
+          loginTime: loginTime || new Date().toISOString(),
+          loginLocation,
+          status: 'halfDay', // Default status until logout is marked
+          picture: imageDetails,
+          lateReason: isLate ? lateReason : undefined
         });
       }
 
-      // Update the existing record with the login time and location
-      attendance.loginTime = loginTime || new Date().toISOString();
-      attendance.loginLocation = loginLocation;
-      if (isLate) {
-        attendance.lateReason = lateReason;
-      }
+      await attendance.save();
+      res.status(201).json({ message: 'Login time and image marked successfully.', attendance });
 
     } else {
-      // Create a new attendance record if none exists for today
-      attendance = new Attendance({
-        employeeId,
-        date: today,
-        loginTime: loginTime || new Date().toISOString(),
-        loginLocation,
-        status: 'halfDay', // Default status until logout is marked
-        lateReason: isLate ? lateReason : undefined
-      });
+      res.status(400).json({ message: 'No image file provided.' });
     }
-
-    await attendance.save();
-    res.status(201).json({ message: 'Login time marked successfully.', attendance });
 
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 
   
