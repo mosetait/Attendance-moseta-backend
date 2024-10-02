@@ -64,7 +64,7 @@ exports.loginEmployee = async (req, res) => {
     const token = jwt.sign(
       { employeeId: employee._id, role: employee.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '72h' }
     );
 
     res.cookie('token', token, { httpOnly: true });
