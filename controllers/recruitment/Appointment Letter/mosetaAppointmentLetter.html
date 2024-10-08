@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Letter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .mainSection {
+            width: 80%;
+            margin: 0 auto;
+            /* border: 1px solid black;  */
+        }
+
+        .headerFooterDiv img {
+            width: 100%;
+        }
+
+        .appointmentDiv {
+            position: relative;
+        }
+
+        .appointmentDiv > p {
+            /* Styling for the date and heading */
+        }
+
+        .date {
+            text-align: right;
+            font-size: 1.2rem;
+        }
+
+        .heading {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .toTheDiv {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .mainContainer {
+            padding: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .subjectDiv {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .firstPara {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .numberingPoints {
+            padding-left: 1rem;
+        }
+
+        .orderedList {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .point4subpoint {
+            padding-left: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .payslipTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .payslipTable td, .payslipTable th {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .payslipTable th {
+            background-color: #f2f2f2;
+        }
+
+        .tableHeading, .tableSubHeading {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .kindlyPara {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .unorderedList {
+            padding: 1rem 2rem;
+        }
+
+        .lastLine {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        .lastDiv {
+            margin-top: 3rem;
+            font-weight: bold;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .mainSection {
+                width: 100%;
+            }
+
+            .headerFooterDiv img {
+                width: 100%;
+            }
+
+            .appointmentDiv > p {
+                font-size: 1rem;
+            }
+
+            .mainContainer {
+                font-size: 1rem;
+            }
+
+            .payslipTable td, .payslipTable th {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="mainSection">
+
+        <!-- Exalta Header -->
+        <div class="headerFooterDiv">
+            <img src="https://i.postimg.cc/vTwYHCR1/mosetaheader.png" alt="exalta-header">
+        </div>
+
+        <div class="mainContainer">
+
+            <div class="appointmentDiv">
+                <p class="date">{{date}}</p>
+                <p class="heading">APPOINTMENT LETTER</p>
+            </div>
+
+            <div class="toTheDiv">
+                <p>To,</p>
+                <p>Mr/Ms/Mrs {{recipient_name}},</p>
+                <p>{{address}}</p>
+                <p>{{cityAndState}}</p>
+                <p>{{pincode}}</p>
+            </div>
+
+            <div class="subjectDiv">
+                <p> <strong>Sub: Appointment Letter - Mr/Ms/Mrs {{recipient_name}} - {{designation}}</strong> </p>
+                <p>Dear <strong>{{recipient_name}}</strong>,</p>
+            </div>
+
+            <div class="firstPara">
+                <p>
+                    With reference to your application and subsequent interview, we have the pleasure in appointing you as 
+                    “{{designation}}” in our organization i.e Insparc Technologies Pvt Ltd. as per the terms and condition mentioned here 
+                    under. 
+                </p>
+                <p>We take great pleasure in inviting you to be an integral part of Insparc Technologies Pvt Ltd.. </p>
+            </div>
+
+            <div class="numberingPoints">
+                <ol class="orderedList">
+                    <li> <strong>Location: </strong> Noida</li>
+                    <li> <strong>Date of Joining: </strong> Your date of appointment as per company records is On {{joining_date}}</li>
+                    <li> <strong>Monthly Gross Salary: </strong> You will be paid a gross amount of Rs—{{salary}}/- per Month.</li>
+
+                    <li> 
+                        <strong>Probation Period: </strong> You will be on probation for three months, from the date of your 
+                        appointment. On satisfactory completion of the probation period you will be confirmed in 
+                        service. If not confirmed after three months, this order will continue to be in operation, and the 
+                        probation period will stand extended automatically till further notice. 
+                    </li>
+
+                    <p class="point4subpoint">
+                        <strong>A. </strong>This is a trial period where the technical assistant's performance is evaluated, which will be the 
+                        first three months.
+                    </p>
+
+                    <li> <strong>Working Hours: </strong> 
+                        Your working hours will be 10 am to 6:30 pm as per the current company 
+                        policy. The company observes a 6 day per week.
+                    </li>
+
+                    <li> <strong>Leave: </strong> 
+                        You will be governed by the current leave policy of the company for permanent employees.  
+                    </li>
+                    
+                    <li> <strong>Travel: </strong> Whenever you are required to undertake travel on company work, you will be 
+                        reimbursed travel expenses as per company norms.  
+                    </li>
+                    
+                    <li> <strong>Responsibilities: </strong> In view of your office, you must effectively perform to ensure results. Your 
+                        performance would be reviewed as per company's performance management system.                           
+                    </li>
+                    
+                    <li> <strong>Notice period: </strong> This appointment may be terminated by either side by giving one month’s 
+                        notice or one month’s salary in lieu of the notice period.  
+                    </li>
+                    
+                    <li> <strong>Salary: </strong> The salary structure typically includes a basic salary, your total gross compensation 
+                        will be as per table below, refer <strong>ANNEXURE - A</strong>.                     
+                    </li>
+                </ol>
+            </div>
+
+            <br> <br>
+            <br>
+
+            <!-- ANNEXURE - A -->
+            <h3 class="tableHeading">ANNEXURE - A</h3>
+            <h4 class="tableSubHeading">Pay Slip</h4>
+
+            <table class="payslipTable">
+                <tr>
+                    <td>Name of the Employee</td>
+                    <td>{{recipientName}}</td>
+                    <td>UAN</td>
+                    <td>Nil</td>
+                </tr>
+                <tr>
+                    <td>Employee ID</td>
+                    <td></td>
+                    <td>PF No</td>
+                    <td>Nil</td>
+                </tr>
+                <tr>
+                    <td>Designation</td>
+                    <td>{{designation}}</td>
+                    <td>ESI No</td>
+                    <td>Nil</td>
+                </tr>
+                <tr>
+                    <td>Department</td>
+                    <td>IT</td>
+                    <td>Bank Name</td>
+                    <td>BOI</td>
+                </tr>
+                <tr>
+                    <td>DOJ</td>
+                    <td>21 Aug 2024</td>
+                    <td>Bank A/C No</td>
+                    <td>7xxxxxxxxxxxx2</td>
+                </tr>
+                <tr>
+                    <td>Gross Wage</td>
+                    <td>₹ 000000</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Total Working Days</td>
+                    <td>30</td>
+                    <td>Paid Days</td>
+                    <td>30</td>
+                </tr>
+                <tr>
+                    <td>LOP days</td>
+                    <td>0</td>
+                    <td>Leaves Taken</td>
+                    <td>0</td>
+                </tr>
+            </table>
+
+            <h4 class="tableSubHeading">Earnings</h4>
+
+            <table class="payslipTable">
+                <tr>
+                    <th>Earnings</th>
+                    <th>Amount</th>
+                    <th>Deductions</th>
+                    <th>Amount</th>
+                </tr>
+                <tr>
+                    <td>Basic + DA</td>
+                    <td>₹ 00000</td>
+                    <td>Professional Tax</td>
+                    <td>₹ 000</td>
+                </tr>
+                <tr>
+                    <td>HRA</td>
+                    <td>₹ 00000</td>
+                    <td>TDS</td>
+                    <td>₹ 0000</td>
+                </tr>
+                <tr>
+                    <td>Conveyance</td>
+                    <td>₹ 0000</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Other Allowance</td>
+                    <td>₹ 00000</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Total Earning</td>
+                    <td>₹ 000000</td>
+                    <td>Total Deduction</td>
+                    <td>₹ 0000</td>
+                </tr>
+            </table>
+
+            <div class="kindlyPara">
+                <p>Kindly sign this copy of the Appointment Letter as a token of your acceptance of the above terms and 
+                    conditions and return to the HR Department at the earliest.</p>
+                <p>Thanking you,</p>
+            </div>
+
+            <div class="lastLine">
+                <p>Yours faithfully,</p>
+            </div>
+
+            <div class="lastDiv">
+                <p>For Insparc Technologies Pvt Ltd.</p>
+                <p>(Authorised Signatory)</p>
+            </div>
+
+            <br> <br>
+
+        </div>
+
+        <!-- Exalta Footer -->
+        <div class="headerFooterDiv">
+            <img src="https://i.postimg.cc/W4Vwg1MS/mosetafooter.png" alt="exalta-footer">
+        </div>
+
+    </section>
+
+</body>
+</html>

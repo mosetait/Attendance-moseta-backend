@@ -126,3 +126,99 @@ exports.getCandidateById = async (req, res) => {
 
 
 
+
+const path = require('path');
+const pdf = require('html-pdf'); // Use puppeteer if needed
+const fs = require('fs');
+const mailSender = require('../../utils/mailSender'); // Update with the correct path
+
+exports.sendPdfEmail = async (req, res) => {
+  try {
+
+    let htmlFilePath;
+
+
+    if(req.body.company === "Exalta"){
+      htmlFilePath = path.join(__dirname, './Appointment Letter', 'exaltaAppointmentLetter.html'); // Path to your HTML file
+    }
+    if(req.body.company === "Moseta"){
+      htmlFilePath = path.join(__dirname, './Appointment Letter', 'mosetaAppointmentLetter.html'); // Path to your HTML file
+    }
+
+
+    // Convert HTML to PDF
+    let htmlContent = fs.readFileSync(htmlFilePath, 'utf-8');
+
+    // Get dynamic data from request body or another source
+    const recipientName = req.body.recipientName;
+    const joiningDate = req.body.joiningDate ;
+    const salary = req.body.salary ;
+    const address = req.body.address;
+    const cityAndState = req.body.cityAndState;
+    const pincode = req.body.pincode;
+
+    const designation = req.body.designation;
+    const date = req.body.date;
+    const department = req.body.department;
+
+
+    // Replace placeholders in HTML with actual data
+    htmlContent = htmlContent
+      .replace(/{{recipient_name}}/g, recipientName)
+      .replace(/{{joining_date}}/g, joiningDate)
+      .replace(/{{salary}}/g, salary)
+      .replace(/{{address}}/g, address)
+      .replace(/{{cityAndState}}/g, cityAndState)
+      .replace(/{{pincode}}/g, pincode)
+      .replace(/{{designation}}/g, designation)
+      .replace(/{{date}}/g, date)
+      .replace(/{{department}}/g, department);
+
+    const pdfFilePath = path.join(__dirname, '../pdfs', 'appointment_letter.pdf'); // Path where the PDF will be saved
+
+    pdf.create(htmlContent).toFile(pdfFilePath, async (err, result) => {
+      if (err) {
+        console.error('Error creating PDF:', err);
+        return res.status(500).send('Failed to create PDF');
+      }
+
+      // Now send the PDF via email using your mailSender function
+      const email = req.body.email; // Replace with the recipient's email
+      const title = 'Appointment Letter';
+      const body = '<p>Please find the attached PDF.</p>'; // You can customize this HTML content
+
+      // Read the PDF file as a buffer
+      const pdfBuffer = fs.readFileSync(pdfFilePath);
+
+      // Create a body for the email with the PDF attachment
+      const attachment = {
+        filename: 'output.pdf',
+        content: pdfBuffer,
+        contentType: 'application/pdf', // Optional: Specify the content type
+      };
+
+      // Call the mailSender function and pass the attachment
+      const mailInfo = await mailSender(email, title, body, attachment);
+
+      if (mailInfo) {
+        res.status(200).send('PDF sent successfully to the email');
+      } else {
+        res.status(500).send('Failed to send email');
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('An error occurred');
+  }
+};
+
+
+
+
+
+
+
+
+
+
+

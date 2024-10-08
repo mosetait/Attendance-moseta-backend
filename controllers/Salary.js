@@ -8,6 +8,7 @@ const moment = require('moment-timezone');
 
 
 exports.calculateMonthlySalaryOfAnEmployee = async (req, res) => {
+    console.log("Ji")
     try {
         const { employeeId, startDate, endDate } = req.body;
 
