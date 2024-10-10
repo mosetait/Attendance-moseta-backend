@@ -5,7 +5,7 @@ const { updateLeaveStatus } = require("../controllers/Leave");
 const { createOffice, getAllOffices, getOfficeById, updateOffice, deleteOffice } = require("../controllers/Office");
 const { getAllEmployees, getAllLeaveRequests, getSingleEmployee } = require("../controllers/Admin");
 const { getAttendanceBetweenDates } = require("../controllers/Attendance");
-const { createRecruitmentProcess, getAllRecruitmentProcesses, getRecruitmentProcessById, addCandidate, updateCandidateStage, getCandidateById, sendPdfEmail } = require("../controllers/recruitment/recruitment");
+const { createRecruitmentProcess, getAllRecruitmentProcesses, getRecruitmentProcessById, addCandidate, updateCandidateStage, getCandidateById, sendPdfEmail, deleteRecruitmentProcess, downloadSalarySlip } = require("../controllers/recruitment/recruitment");
 const router = express.Router();
 
 
@@ -44,6 +44,7 @@ router.route("/get-all-leaves-requests").post(isAuthenticated , isAdmin , getAll
 router.post('/recruitment/create',isAuthenticated, isAdmin, createRecruitmentProcess);
 router.get('/recruitment',isAuthenticated, isAdmin, getAllRecruitmentProcesses);
 router.get('/recruitment/:id',isAuthenticated, isAdmin, getRecruitmentProcessById);
+router.delete('/recruitment_process/:processId', deleteRecruitmentProcess);
 
 // Candidate routes
 router.post('/candidate/add',isAuthenticated, isAdmin, addCandidate);
@@ -52,6 +53,7 @@ router.get('/candidate/:id',isAuthenticated, isAdmin, getCandidateById);
 
 
 router.post('/send_offer_letter',isAuthenticated, isAdmin, sendPdfEmail);
+router.post('/download_salary_slip',isAuthenticated, isAdmin, downloadSalarySlip);
 
 
 

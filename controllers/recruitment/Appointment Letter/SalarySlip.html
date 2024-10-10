@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #000;
+        }
+
+        .salary-slip {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #2f2f2f;
+            color: white;
+            border: 1px solid #000;
+        }
+
+        .salary-slip h1, 
+        .salary-slip h2, 
+        .salary-slip h3 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table.details td, 
+        table.earnings td {
+            border: 1px solid white;
+            padding: 8px;
+        }
+
+        table.details td:nth-child(even), 
+        table.earnings td:nth-child(even) {
+            background-color: #ccc800;
+            color: #000;
+        }
+
+        table.details td:nth-child(odd),
+        table.earnings td:nth-child(odd) {
+            background-color: #3a3a3a;
+        }
+
+        table.details, 
+        table.earnings {
+            margin: 10px 0;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        .net-salary {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        /* Style for empty fields */
+        td:empty {
+            background-color: #444444;
+            color: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="salary-slip">
+        <h1>{{companyName}}</h1>
+        <p>{{companyAddress}}</p>
+        <h2>Pay Slip for {{monthAndYear}}</h2>
+
+        <table class="details">
+            <tr>
+                <td>Name of the Employee</td>
+                <td>{{employeeName}}</td>
+                <td>UAN</td>
+                <td>{{uan}}</td>
+            </tr>
+            <tr>
+                <td>Employee ID</td>
+                <td>{{employeeId}}</td>
+                <td>PF No</td>
+                <td>{{pfNo}};</td>
+            </tr>
+            <tr>
+                <td>Designation</td>
+                <td>{{designation}}</td>
+                <td>ESI No</td>
+                <td>{{esiNo}}</td>
+            </tr>
+            <tr>
+                <td>Department</td>
+                <td>{{department}}</td>
+                <td>Bank Name</td>
+                <td>{{bankName}}</td>
+            </tr>
+            <tr>
+                <td>DOJ</td>
+                <td>{{doj}}</td>
+                <td>Bank A/C No</td>
+                <td>{{bankAccountNo}}</td>
+            </tr>
+            <tr>
+                <td>Gross Wage</td>
+                <td>{{grossWage}}</td>
+                <td>Total Working Days</td>
+                <td>{{totalWorkingDays}}</td>
+            </tr>
+            <tr>
+                <td>Paid Days</td>
+                <td>{{paidDays}}</td>
+                <td>LOP Days</td>
+                <td>{{lopDays}}</td>
+            </tr>
+            <tr>
+                <td>Leaves Taken</td>
+                <td>{{leavesTaken}}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <h3>Earnings</h3>
+        <table class="earnings">
+            <tr>
+                <td>Basic Wage</td>
+                <td>₹{{basicWage}}</td>
+                <td>EPF</td>
+                <td> {{epf}} </td>
+            </tr>
+            <tr>
+                <td>HRA</td>
+                <td>{{hra}}</td>
+                <td>ESI/Health Insurance</td>
+                <td>{{esiHealthInsurance}}</td>
+            </tr>
+            <tr>
+                <td>Conveyance Allowances</td>
+                <td>₹{{conveyanceAllowances}}</td>
+                <td>Professional Tax</td>
+                <td>{{professionalTax}}</td>
+            </tr>
+            <tr>
+                <td>Medical Allowances</td>
+                <td>₹{{medicalAllowances}}</td>
+                <td>Loan Recovery</td>
+                <td>{{loanRecovery}}</td>
+            </tr>
+            <tr>
+                <td>Other Allowances</td>
+                <td>₹{{otherAllowances}}</td>
+            </tr>
+            <tr>
+                <td>Total Earnings</td>
+                <td>₹ {{totalEarnings}}</td>
+                <td>Total Deductions</td>
+                <td>{{totalDeductions}}</td>
+            </tr>
+        </table>
+
+        <div class="net-salary">
+            <h3>Net Salary: ₹ {{netSalary}}</h3>
+        </div>
+
+        <p>Signature of Employee</p>
+    </div>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 const RecruitmentProcess = require('../../models/Recruitment/RecruitmentModal');
 const Candidate = require('../../models/Recruitment/CandidateModal');
-
+const asyncHandler = require("../../middlewares/asyncHandler")
 
 // Create a new recruitment process
 exports.createRecruitmentProcess = async (req, res) => {
@@ -14,6 +14,33 @@ exports.createRecruitmentProcess = async (req, res) => {
     res.status(500).json({ message: 'Error creating recruitment process', error: err.message });
   }
 };
+
+
+exports.deleteRecruitmentProcess = asyncHandler( async (req,res) => {
+
+
+  const { processId } = req.params;
+
+  // Find the recruitment process by ID
+  const recruitmentProcess = await RecruitmentProcess.findById(processId);
+
+  if (!recruitmentProcess) {
+    return res.status(404).json({ message: 'Recruitment process not found' });
+  }
+
+  // Delete all candidates associated with this recruitment process
+  await Candidate.deleteMany({ process: processId });
+
+  // Delete the recruitment process
+  await RecruitmentProcess.findByIdAndDelete(processId);
+
+  const processes = await RecruitmentProcess.find().populate('candidates'); // Populates with candidate details
+
+
+  res.status(200).json({ message: 'Recruitment process and associated candidates deleted successfully' , processes });
+
+
+})
 
 
 // Get all recruitment processes
@@ -218,6 +245,126 @@ exports.sendPdfEmail = async (req, res) => {
 
 
 
+
+
+
+
+
+exports.downloadSalarySlip = async (req, res) => {
+  try {
+
+    const htmlFilePath = path.join(__dirname, './Appointment Letter', 'SalarySlip.html'); // Path to your HTML file
+
+
+    // Convert HTML to PDF
+    let htmlContent = fs.readFileSync(htmlFilePath, 'utf-8');
+
+    // Get dynamic data from request body or another source
+    const {
+      companyName,
+      companyAddress,
+      monthAndYear,
+      employeeName,
+      uan,
+      employeeId,
+      pfNo,
+      designation,
+      esiNo,
+      department,
+      bankName,
+      doj,
+      bankAccountNo,
+      grossWage,
+      totalWorkingDays,
+      paidDays,
+      lopDays,
+      leavesTaken,
+      basicWage,
+      hra,
+      conveyanceAllowances,
+      medicalAllowances,
+      otherAllowances,
+      epf,
+      esiHealthInsurance,
+      professionalTax,
+      loanRecovery,
+      totalEarnings,
+      totalDeductions,
+      email,
+
+    } = req.body;
+
+
+    // Replace placeholders in HTML with actual data
+    htmlContent = htmlContent
+    .replace(/{{companyName}}/g, companyName)
+    .replace(/{{companyAddress}}/g, companyAddress)
+    .replace(/{{monthAndYear}}/g, monthAndYear)
+    .replace(/{{employeeName}}/g, employeeName)
+    .replace(/{{uan}}/g, uan)
+    .replace(/{{employeeId}}/g, employeeId)
+    .replace(/{{pfNo}}/g, pfNo)
+    .replace(/{{designation}}/g, designation)
+    .replace(/{{esiNo}}/g, esiNo)
+    .replace(/{{department}}/g, department)
+    .replace(/{{bankName}}/g, bankName)
+    .replace(/{{doj}}/g, doj)
+    .replace(/{{bankAccountNo}}/g, bankAccountNo)
+    .replace(/{{grossWage}}/g, grossWage)
+    .replace(/{{totalWorkingDays}}/g, totalWorkingDays)
+    .replace(/{{paidDays}}/g, paidDays)
+    .replace(/{{lopDays}}/g, lopDays)
+    .replace(/{{leavesTaken}}/g, leavesTaken)
+    .replace(/{{basicWage}}/g, basicWage)
+    .replace(/{{hra}}/g, hra)
+    .replace(/{{conveyanceAllowances}}/g, conveyanceAllowances)
+    .replace(/{{medicalAllowances}}/g, medicalAllowances)
+    .replace(/{{otherAllowances}}/g, otherAllowances)
+    .replace(/{{epf}}/g, epf)
+    .replace(/{{esiHealthInsurance}}/g, esiHealthInsurance)
+    .replace(/{{professionalTax}}/g, professionalTax)
+    .replace(/{{loanRecovery}}/g, loanRecovery)
+    .replace(/{{totalEarnings}}/g, totalEarnings)
+    .replace(/{{totalDeductions}}/g, totalDeductions)
+    .replace(/{{netSalary}}/g, netSalary)
+
+    const pdfFilePath = path.join(__dirname, '../pdfs', 'appointment_letter.pdf'); // Path where the PDF will be saved
+
+    pdf.create(htmlContent).toFile(pdfFilePath, async (err, result) => {
+      if (err) {
+        console.error('Error creating PDF:', err);
+        return res.status(500).send('Failed to create PDF');
+      }
+
+      // Now send the PDF via email using your mailSender function
+      const email = req.body.email; // Replace with the recipient's email
+      const title = 'Salary Slip';
+      const body = '<p>Please find the attached PDF.</p>'; // You can customize this HTML content
+
+      // Read the PDF file as a buffer
+      const pdfBuffer = fs.readFileSync(pdfFilePath);
+
+      // Create a body for the email with the PDF attachment
+      const attachment = {
+        filename: 'output.pdf',
+        content: pdfBuffer,
+        contentType: 'application/pdf', // Optional: Specify the content type
+      };
+
+      // Call the mailSender function and pass the attachment
+      const mailInfo = await mailSender(email, title, body, attachment);
+
+      if (mailInfo) {
+        res.status(200).send('PDF sent successfully to the email');
+      } else {
+        res.status(500).send('Failed to send email');
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('An error occurred');
+  }
+};
 
 
 
